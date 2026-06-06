@@ -18,12 +18,6 @@ export default function Pomodoro() {
   const intervalRef = useRef(null);
 
   useEffect(() => {
-    setTimeLeft(MODES[mode].duration);
-    setRunning(false);
-    clearInterval(intervalRef.current);
-  }, [mode]);
-
-  useEffect(() => {
     if (running) {
       intervalRef.current = setInterval(() => {
         setTimeLeft(prev => {
@@ -31,6 +25,20 @@ export default function Pomodoro() {
             clearInterval(intervalRef.current);
             setRunning(false);
             if (mode === 'pomodoro') setSessions(s => s + 1);
+            try {
+              const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              const oscillator = audioCtx.createOscillator();
+              const gainNode = audioCtx.createGain();
+              oscillator.connect(gainNode);
+              gainNode.connect(audioCtx.destination);
+              oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+              oscillator.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1);
+              oscillator.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
+              gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+              gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+              oscillator.start(audioCtx.currentTime);
+              oscillator.stop(audioCtx.currentTime + 0.5);
+            } catch(e) {}
             return 0;
           }
           return prev - 1;

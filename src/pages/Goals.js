@@ -40,6 +40,9 @@ export default function Goals() {
     alert('Please enter a deadline date! 📅');
     return;
   }
+  const [editingGoal, setEditingGoal] = useState(null);
+const [editGoal, setEditGoal] = useState(null);
+const [customDays, setCustomDays] = useState('');
   const { data, error } = await supabase
     .from('goals')
     .insert([{ ...newGoal, user_id: user.id }])
@@ -56,6 +59,40 @@ export default function Goals() {
     await supabase.from('goals').delete().eq('id', id);
     setGoals(goals.filter(g => g.id !== id));
   };
+  const startEditGoal = (goal) => {
+  setEditingGoal(goal.id);
+  setEditGoal({
+    title: goal.title,
+    description: goal.description || '',
+    type: goal.type,
+    emoji: goal.emoji,
+    target_date: goal.target_date || '',
+    start_date: goal.start_date || new Date().toISOString().split('T')[0],
+  });
+};
+
+const saveEditGoal = async (id) => {
+  const { data } = await supabase
+    .from('goals')
+    .update(editGoal)
+    .eq('id', id)
+    .select();
+  setGoals(goals.map(g => g.id === id ? data[0] : g));
+  setEditingGoal(null);
+  setEditGoal(null);
+};
+
+const setDurationDays = (days) => {
+  const start = new Date();
+  const end = new Date();
+  end.setDate(end.getDate() + parseInt(days));
+  setEditGoal({
+    ...editGoal,
+    start_date: start.toISOString().split('T')[0],
+    target_date: end.toISOString().split('T')[0],
+  });
+  setCustomDays(days);
+};
 
   const updateProgress = async (goal, amount) => {
     const newProgress = Math.min(100, Math.max(0, goal.progress + amount));
@@ -150,6 +187,83 @@ export default function Goals() {
                     </span>
                   </div>
                   <button onClick={() => deleteGoal(goal.id)} style={styles.deleteBtn}>🗑️</button>
+                  {editingGoal === goal.id && editGoal ? (
+  <div style={{ ...styles.editBox, background: theme.accent, border: `1px solid ${theme.border}` }}>
+    <input
+      style={{ ...styles.input, background: theme.card, border: `2px solid ${theme.border}`, color: theme.text, marginBottom: '8px' }}
+      value={editGoal.title}
+      onChange={(e) => setEditGoal({ ...editGoal, title: e.target.value })}
+      placeholder="Goal title"
+    />
+    <textarea
+      style={{ ...styles.textarea, background: theme.card, border: `2px solid ${theme.border}`, color: theme.text, marginBottom: '8px' }}
+      value={editGoal.description}
+      onChange={(e) => setEditGoal({ ...editGoal, description: e.target.value })}
+      placeholder="Description"
+    />
+    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+      {['10', '21', '30', '60', '90', '180'].map(days => (
+        <button
+          key={days}
+          onClick={() => setDurationDays(days)}
+          style={{
+            padding: '6px 12px',
+            borderRadius: '8px',
+            border: `1.5px solid ${theme.border}`,
+            background: customDays === days ? theme.primary : theme.card,
+            color: customDays === days ? '#fff' : theme.textLight,
+            cursor: 'pointer',
+            fontSize: '0.82rem',
+            fontWeight: '600',
+          }}
+        >
+          {days} days
+        </button>
+      ))}
+    </div>
+    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+      <div style={{ flex: 1 }}>
+        <label style={{ color: theme.textLight, fontSize: '0.78rem' }}>Start Date</label>
+        <input
+          style={{ ...styles.input, background: theme.card, border: `2px solid ${theme.border}`, color: theme.text }}
+          type="date"
+          value={editGoal.start_date}
+          onChange={(e) => setEditGoal({ ...editGoal, start_date: e.target.value })}
+        />
+      </div>
+      <div style={{ flex: 1 }}>
+        <label style={{ color: theme.textLight, fontSize: '0.78rem' }}>Deadline</label>
+        <input
+          style={{ ...styles.input, background: theme.card, border: `2px solid ${theme.border}`, color: theme.text }}
+          type="date"
+          value={editGoal.target_date}
+          onChange={(e) => setEditGoal({ ...editGoal, target_date: e.target.value })}
+        />
+      </div>
+    </div>
+    <div style={{ display: 'flex', gap: '8px' }}>
+      <button
+        onClick={() => setEditingGoal(null)}
+        style={{ flex: 1, padding: '10px', borderRadius: '10px', background: theme.card, border: `1px solid ${theme.border}`, color: theme.textLight, cursor: 'pointer', fontWeight: '600' }}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={() => saveEditGoal(goal.id)}
+        style={{ flex: 1, padding: '10px', borderRadius: '10px', background: theme.gradient, border: 'none', color: '#fff', cursor: 'pointer', fontWeight: '700' }}
+      >
+        💾 Save
+      </button>
+    </div>
+  </div>
+) : (
+  <button
+    onClick={() => startEditGoal(goal)}
+    style={{ ...styles.aiBtn, background: theme.accent, color: theme.primary, border: `1px solid ${theme.border}`, marginTop: '8px' }}
+  >
+    ✏️ Edit Goal
+  </button>
+)}
                 </div>
 
                 {goal.description && <p style={{ color: theme.textLight, fontSize: '0.88rem', marginBottom: '12px' }}>{goal.description}</p>}
@@ -209,4 +323,5 @@ const styles = {
   progressFill: { height: '100%', borderRadius: '10px', transition: 'width 0.5s ease' },
   controls: { display: 'flex', gap: '6px', marginBottom: '12px', flexWrap: 'wrap' },
   ctrlBtn: { padding: '6px 10px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600' },
+  editBox: { borderRadius: '12px', padding: '14px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '8px' },
 };

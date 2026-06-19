@@ -1,3 +1,4 @@
+import Journal from './pages/Journal';
 import Achievements from './pages/Achievements';
 import Timeline from './pages/Timeline';
 import React from 'react';
@@ -27,6 +28,7 @@ function App() {
       <ThemeProvider>
         <Router>
           <Routes>
+            <Route path="/journal" element={<PrivateRoute><Journal /></PrivateRoute>} />
             <Route path="/achievements" element={<PrivateRoute><Achievements /></PrivateRoute>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

@@ -17,6 +17,7 @@ export default function Navbar() {
 
   const navItems = [
     { path: '/', label: 'Dashboard', emoji: '🏡' },
+    { path: '/journal', label: 'Journal', emoji: '📖' },
     { path: '/achievements', label: 'Achievements', emoji: '🏆' },
     { path: '/timeline', label: 'Timeline', emoji: '🕐' },
     { path: '/goals', label: 'Goals', emoji: '🎯' },

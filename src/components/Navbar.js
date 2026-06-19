@@ -17,12 +17,13 @@ export default function Navbar() {
 
   const navItems = [
     { path: '/', label: 'Dashboard', emoji: '🏡' },
-    { path: '/journal', label: 'Journal', emoji: '📖' },
-    { path: '/achievements', label: 'Achievements', emoji: '🏆' },
     { path: '/timeline', label: 'Timeline', emoji: '🕐' },
     { path: '/goals', label: 'Goals', emoji: '🎯' },
     { path: '/habits', label: 'Habits', emoji: '🌱' },
     { path: '/mood', label: 'Mood', emoji: '💆' },
+    { path: '/journal', label: 'Journal', emoji: '📖' },
+    { path: '/achievements', label: 'Achievements', emoji: '🏆' },
+    { path: '/weekly', label: 'Weekly Review', emoji: '📅' },
     { path: '/pomodoro', label: 'Focus Timer', emoji: '⏱️' },
     { path: '/friends', label: 'Friends', emoji: '👥' },
     { path: '/analytics', label: 'Analytics', emoji: '📊' },

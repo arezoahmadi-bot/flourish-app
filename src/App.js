@@ -1,3 +1,4 @@
+import WeeklyReview from './pages/WeeklyReview';
 import Journal from './pages/Journal';
 import Achievements from './pages/Achievements';
 import Timeline from './pages/Timeline';
@@ -28,6 +29,7 @@ function App() {
       <ThemeProvider>
         <Router>
           <Routes>
+            <Route path="/weekly" element={<PrivateRoute><WeeklyReview /></PrivateRoute>} />
             <Route path="/journal" element={<PrivateRoute><Journal /></PrivateRoute>} />
             <Route path="/achievements" element={<PrivateRoute><Achievements /></PrivateRoute>} />
             <Route path="/login" element={<Login />} />

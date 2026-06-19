@@ -16,8 +16,9 @@ export default function Navbar() {
   };
 
   const navItems = [
-    { path: '/timeline', label: 'Timeline', emoji: '🕐' },
     { path: '/', label: 'Dashboard', emoji: '🏡' },
+    { path: '/achievements', label: 'Achievements', emoji: '🏆' },
+    { path: '/timeline', label: 'Timeline', emoji: '🕐' },
     { path: '/goals', label: 'Goals', emoji: '🎯' },
     { path: '/habits', label: 'Habits', emoji: '🌱' },
     { path: '/mood', label: 'Mood', emoji: '💆' },

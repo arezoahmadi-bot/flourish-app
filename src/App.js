@@ -1,3 +1,4 @@
+import Timeline from './pages/Timeline';
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
@@ -35,6 +36,7 @@ function App() {
             <Route path="/pomodoro" element={<PrivateRoute><Pomodoro /></PrivateRoute>} />
             <Route path="/habits" element={<PrivateRoute><Habits /></PrivateRoute>} />
             <Route path="/mood" element={<PrivateRoute><Mood /></PrivateRoute>} />
+            <Route path="/timeline" element={<PrivateRoute><Timeline /></PrivateRoute>} />
           </Routes>
         </Router>
       </ThemeProvider>

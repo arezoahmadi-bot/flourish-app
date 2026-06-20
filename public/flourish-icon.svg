@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="120" fill="#5a9e5f"/>
+  
+  <!-- Stem -->
+  <path d="M256 380 Q256 280 256 200" stroke="#ffffff" stroke-width="18" stroke-linecap="round" fill="none"/>
+  
+  <!-- Main leaf left -->
+  <path d="M256 260 Q200 220 180 160 Q230 170 256 220" fill="#ffffff" opacity="0.9"/>
+  
+  <!-- Main leaf right -->
+  <path d="M256 300 Q310 260 340 190 Q290 200 256 260" fill="#d4e8c2" opacity="0.9"/>
+  
+  <!-- Small leaf top -->
+  <path d="M256 200 Q230 170 220 130 Q255 145 256 200" fill="#ffffff" opacity="0.7"/>
+  
+  <!-- Soil/ground dots -->
+  <circle cx="220" cy="390" r="10" fill="#ffffff" opacity="0.4"/>
+  <circle cx="256" cy="395" r="10" fill="#ffffff" opacity="0.4"/>
+  <circle cx="292" cy="390" r="10" fill="#ffffff" opacity="0.4"/>
+  
+  <!-- Sparkle top right -->
+  <circle cx="350" cy="120" r="6" fill="#ffffff" opacity="0.6"/>
+  <circle cx="370" cy="100" r="4" fill="#ffffff" opacity="0.4"/>
+  <circle cx="330" cy="95" r="5" fill="#ffffff" opacity="0.5"/>
+</svg>

@@ -39,3 +39,28 @@ button:hover {
 button:active {
   transform: translateY(0px);
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .charts-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .themes-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Smooth animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}

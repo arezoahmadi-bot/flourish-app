@@ -23,40 +23,45 @@ export default function Pomodoro() {
     long: 15,
   });
   const intervalRef = useRef(null);
+  const startTimeRef = useRef(null);
+const totalDurationRef = useRef(null);
 
-  useEffect(() => {
+useEffect(() => {
+    totalDurationRef.current = modes[mode].duration;
     setTimeLeft(modes[mode].duration);
     setRunning(false);
     clearInterval(intervalRef.current);
   }, [mode, modes]);
-
-  useEffect(() => {
+  
+ useEffect(() => {
     if (running) {
+      startTimeRef.current = Date.now() - ((totalDurationRef.current - timeLeft) * 1000);
       intervalRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            clearInterval(intervalRef.current);
-            setRunning(false);
-            if (mode === 'pomodoro') setSessions(s => s + 1);
-            try {
-              const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-              const oscillator = audioCtx.createOscillator();
-              const gainNode = audioCtx.createGain();
-              oscillator.connect(gainNode);
-              gainNode.connect(audioCtx.destination);
-              oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
-              oscillator.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1);
-              oscillator.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
-              gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-              gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-              oscillator.start(audioCtx.currentTime);
-              oscillator.stop(audioCtx.currentTime + 0.5);
-            } catch(e) {}
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const remaining = totalDurationRef.current - elapsed;
+        if (remaining <= 0) {
+          clearInterval(intervalRef.current);
+          setRunning(false);
+          setTimeLeft(0);
+          if (mode === 'pomodoro') setSessions(s => s + 1);
+          try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+            oscillator.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.5);
+          } catch(e) {}
+        } else {
+          setTimeLeft(remaining);
+        }
+      }, 500);
     } else {
       clearInterval(intervalRef.current);
     }

@@ -1,4 +1,6 @@
 import Notifications from './pages/Notifications';
+import FriendFeed from './pages/FriendFeed';
+import ProductivityScore from './pages/ProductivityScore';
 import WeeklyReview from './pages/WeeklyReview';
 import Journal from './pages/Journal';
 import Achievements from './pages/Achievements';
@@ -30,6 +32,8 @@ function App() {
       <ThemeProvider>
         <Router>
           <Routes>
+            <Route path="/feed" element={<PrivateRoute><FriendFeed /></PrivateRoute>} />
+            <Route path="/productivity" element={<PrivateRoute><ProductivityScore /></PrivateRoute>} />
             <Route path="/weekly" element={<PrivateRoute><WeeklyReview /></PrivateRoute>} />
             <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
             <Route path="/journal" element={<PrivateRoute><Journal /></PrivateRoute>} />

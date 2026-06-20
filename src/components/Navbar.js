@@ -24,6 +24,8 @@ export default function Navbar() {
     { path: '/pomodoro', label: 'Focus Timer', emoji: '⏱️' },
     { path: '/journal', label: 'Journal', emoji: '📖' },
     { path: '/friends', label: 'Friends', emoji: '👥' },
+    { path: '/feed', label: 'Friend Feed', emoji: '📰' },
+    { path: '/productivity', label: 'My Score', emoji: '⚡' },
     { path: '/analytics', label: 'Analytics', emoji: '📊' },
     { path: '/weekly', label: 'Weekly Review', emoji: '📅' },
     { path: '/achievements', label: 'Achievements', emoji: '🏆' },

@@ -1,4 +1,5 @@
 import Notifications from './pages/Notifications';
+import OfflineBanner from './components/OfflineBanner';
 import FriendFeed from './pages/FriendFeed';
 import ProductivityScore from './pages/ProductivityScore';
 import WeeklyReview from './pages/WeeklyReview';
@@ -30,6 +31,7 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
+        <OfflineBanner />
         <Router>
           <Routes>
             <Route path="/feed" element={<PrivateRoute><FriendFeed /></PrivateRoute>} />

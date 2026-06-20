@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Flourish",
+  "name": "Flourish - Your Growth Companion",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,9 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#5a9e5f",
+  "background_color": "#f4f1eb",
+  "description": "Your personal growth companion for goals, habits, mood and productivity",
+  "orientation": "portrait",
+  "categories": ["productivity", "lifestyle", "health"]
 }

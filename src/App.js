@@ -1,3 +1,4 @@
+import Notifications from './pages/Notifications';
 import WeeklyReview from './pages/WeeklyReview';
 import Journal from './pages/Journal';
 import Achievements from './pages/Achievements';
@@ -30,6 +31,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/weekly" element={<PrivateRoute><WeeklyReview /></PrivateRoute>} />
+            <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
             <Route path="/journal" element={<PrivateRoute><Journal /></PrivateRoute>} />
             <Route path="/achievements" element={<PrivateRoute><Achievements /></PrivateRoute>} />
             <Route path="/login" element={<Login />} />

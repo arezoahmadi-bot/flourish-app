@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Notifications from './pages/Notifications';
 import OfflineBanner from './components/OfflineBanner';
 import FriendFeed from './pages/FriendFeed';
@@ -24,9 +25,20 @@ import './index.css';
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (user) {
+      const visited = JSON.parse(localStorage.getItem('flourish_visited_pages') || '[]');
+      if (!visited.includes(location.pathname)) {
+        visited.push(location.pathname);
+        localStorage.setItem('flourish_visited_pages', JSON.stringify(visited));
+      }
+    }
+  }, [location.pathname, user]);
+
   return user ? children : <Navigate to="/login" />;
 };
-
 function App() {
   return (
     <AuthProvider>

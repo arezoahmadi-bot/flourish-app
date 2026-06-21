@@ -81,23 +81,69 @@ export default function Achievements() {
     setLoading(false);
   };
 
-  const calculateBadges = (s) => {
-    const unlocked = [];
-    if (s.completedTasks >= 1) unlocked.push('first_task');
-    if (s.completedTasks >= 10) unlocked.push('ten_tasks');
-    if (s.completedTasks >= 50) unlocked.push('fifty_tasks');
-    if (s.totalGoals >= 1) unlocked.push('first_goal');
-    if (s.completedGoals >= 1) unlocked.push('first_goal_done');
-    if (s.completedGoals >= 3) unlocked.push('three_goals');
-    if (s.streak >= 3) unlocked.push('streak_3');
-    if (s.streak >= 7) unlocked.push('streak_7');
-    if (s.streak >= 30) unlocked.push('streak_30');
-    if (s.totalHabits >= 1) unlocked.push('first_habit');
-    if (s.totalMoodLogs >= 1) unlocked.push('first_mood');
-    if (s.totalMoodLogs >= 7) unlocked.push('mood_week');
-    if (s.totalFriends >= 1) unlocked.push('first_friend');
-    setUnlockedBadges(unlocked);
-  };
+  const calculateBadges = (s, tasks, habits) => {
+  const unlocked = [];
+
+  // Task badges
+  if (s.completedTasks >= 1) unlocked.push('first_task');
+  if (s.completedTasks >= 10) unlocked.push('ten_tasks');
+  if (s.completedTasks >= 50) unlocked.push('fifty_tasks');
+
+  // Goal badges
+  if (s.totalGoals >= 1) unlocked.push('first_goal');
+  if (s.completedGoals >= 1) unlocked.push('first_goal_done');
+  if (s.completedGoals >= 3) unlocked.push('three_goals');
+
+  // Streak badges
+  if (s.streak >= 3) unlocked.push('streak_3');
+  if (s.streak >= 7) unlocked.push('streak_7');
+  if (s.streak >= 30) unlocked.push('streak_30');
+
+  // Habit badges
+  if (s.totalHabits >= 1) unlocked.push('first_habit');
+  if (habits.some(h => (h.streak || 0) >= 7)) unlocked.push('habit_week');
+
+  // Mood badges
+  if (s.totalMoodLogs >= 1) unlocked.push('first_mood');
+  if (s.totalMoodLogs >= 7) unlocked.push('mood_week');
+
+  // Friends badges
+  if (s.totalFriends >= 1) unlocked.push('first_friend');
+
+  // Early Bird — task created before 7 AM
+  const earlyTasks = tasks.filter(t => {
+    const hour = new Date(t.created_at).getHours();
+    return hour < 7;
+  });
+  if (earlyTasks.length > 0) unlocked.push('early_bird');
+
+  // Night Owl — task created after 10 PM
+  const lateTasks = tasks.filter(t => {
+    const hour = new Date(t.created_at).getHours();
+    return hour >= 22;
+  });
+  if (lateTasks.length > 0) unlocked.push('night_owl');
+
+  // Perfectionist — all tasks completed on any day
+  const tasksByDate = tasks.reduce((acc, t) => {
+    const date = t.due_date;
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(t);
+    return acc;
+  }, {});
+
+  const perfectDay = Object.values(tasksByDate).some(
+    dayTasks => dayTasks.length > 0 && dayTasks.every(t => t.completed)
+  );
+  if (perfectDay) unlocked.push('perfectionist');
+
+  // Explorer — visited all pages (we track this in localStorage)
+  const visitedPages = JSON.parse(localStorage.getItem('flourish_visited_pages') || '[]');
+  const allPages = ['/', '/goals', '/habits', '/mood', '/timeline', '/pomodoro', '/journal', '/friends', '/analytics', '/weekly', '/achievements', '/notifications', '/settings'];
+  if (allPages.every(p => visitedPages.includes(p))) unlocked.push('explorer');
+
+  setUnlockedBadges(unlocked);
+};
 
   const isUnlocked = (id) => unlockedBadges.includes(id);
 

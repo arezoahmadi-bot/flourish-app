@@ -36,6 +36,17 @@ export default function Dashboard() {
   const dateHeading = today.toLocaleDateString('en-US', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
+  useEffect(() => {
+  const hour = new Date().getHours();
+  if (hour < 12) setGreeting('Good morning');
+  else if (hour < 17) setGreeting('Good afternoon');
+  else setGreeting('Good evening');
+  fetchProfile();
+
+  // Sync when coming back online
+  window.addEventListener('online', syncLocalTasks);
+  return () => window.removeEventListener('online', syncLocalTasks);
+}, []);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -97,27 +108,65 @@ export default function Dashboard() {
     }
   };
 
-  const fetchTasks = async () => {
-    let query = supabase.from('tasks').select('*').eq('user_id', user.id);
-    if (viewMode === 'today') {
-      query = query.eq('due_date', todayStr);
-    } else if (viewMode === 'all') {
-      query = query.order('due_date', { ascending: false });
-    }
-    const { data } = await query.order('created_at', { ascending: true });
-    setTasks(data || []);
-  };
+ const fetchTasks = async () => {
+  try {
+    const { data } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('due_date', todayStr)
+      .order('created_at', { ascending: true });
+    const tasks = data || [];
+    setTasks(tasks);
+    // Save to local storage for offline use
+    localStorage.setItem('flourish_tasks_' + todayStr, JSON.stringify(tasks));
+  } catch (err) {
+    // If offline, load from local storage
+    const cached = localStorage.getItem('flourish_tasks_' + todayStr);
+    if (cached) setTasks(JSON.parse(cached));
+  }
+};  
 
   const addTask = async () => {
-    if (!newTask.trim()) return;
+  if (!newTask.trim()) return;
+  const task = {
+    id: 'local_' + Date.now(),
+    user_id: user.id,
+    title: newTask,
+    due_date: todayStr,
+    completed: false,
+    created_at: new Date().toISOString(),
+  };
+
+  // Add to UI immediately
+  const updatedTasks = [...tasks, task];
+  setTasks(updatedTasks);
+  localStorage.setItem('flourish_tasks_' + todayStr, JSON.stringify(updatedTasks));
+  setNewTask('');
+
+  // Try to save to Supabase if online
+  try {
     const { data, error } = await supabase
       .from('tasks')
-      .insert([{ user_id: user.id, title: newTask, due_date: todayStr }])
+      .insert([{
+        user_id: user.id,
+        title: task.title,
+        due_date: todayStr,
+      }])
       .select();
-    if (error) return;
-    if (data && data.length > 0) setTasks([...tasks, ...data]);
-    setNewTask('');
-  };
+    if (!error && data) {
+      // Replace local task with real one from server
+      const synced = updatedTasks.map(t =>
+        t.id === task.id ? data[0] : t
+      );
+      setTasks(synced);
+      localStorage.setItem('flourish_tasks_' + todayStr, JSON.stringify(synced));
+    }
+  } catch (err) {
+    // Stay offline, task is saved locally
+    console.log('Offline - task saved locally');
+  }
+};
 
   const toggleTask = async (task) => {
     const { data } = await supabase
@@ -126,9 +175,48 @@ export default function Dashboard() {
   };
 
   const deleteTask = async (id) => {
-    await supabase.from('tasks').delete().eq('id', id);
-    setTasks(tasks.filter(t => t.id !== id));
-  };
+  const updatedTasks = tasks.filter(t => t.id !== id);
+  setTasks(updatedTasks);
+  localStorage.setItem('flourish_tasks_' + todayStr, JSON.stringify(updatedTasks));
+
+  try {
+    if (!id.toString().startsWith('local_')) {
+      await supabase.from('tasks').delete().eq('id', id);
+    }
+  } catch (err) {
+    console.log('Offline - delete saved locally');
+  }
+};
+const syncLocalTasks = async () => {
+  const cached = localStorage.getItem('flourish_tasks_' + todayStr);
+  if (!cached) return;
+  const localTasks = JSON.parse(cached);
+  const unsyncedTasks = localTasks.filter(t =>
+    t.id.toString().startsWith('local_')
+  );
+  for (const task of unsyncedTasks) {
+    try {
+      const { data } = await supabase
+        .from('tasks')
+        .insert([{
+          user_id: user.id,
+          title: task.title,
+          due_date: task.due_date,
+          completed: task.completed,
+        }])
+        .select();
+      if (data) {
+        const updated = localTasks.map(t =>
+          t.id === task.id ? data[0] : t
+        );
+        localStorage.setItem('flourish_tasks_' + todayStr, JSON.stringify(updated));
+        setTasks(updated);
+      }
+    } catch (err) {
+      console.log('Still offline');
+    }
+  }
+};
 
   const startEdit = (task) => {
     setEditingTask(task.id);

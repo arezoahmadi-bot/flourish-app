@@ -1,59 +1,61 @@
-const CACHE_NAME = 'flourish-v2';
-
-const STATIC_ASSETS = [
+const CACHE_NAME = 'flourish-v1';
+const urlsToCache = [
   '/',
   '/index.html',
+  '/static/js/main.chunk.js',
+  '/static/js/bundle.js',
+  '/static/css/main.chunk.css',
   '/manifest.json',
-  '/flourish-icon.svg',
 ];
 
-// Install — cache static assets
+// Install service worker and cache files
 self.addEventListener('install', event => {
-  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(STATIC_ASSETS);
+      console.log('Opened cache');
+      return cache.addAll(urlsToCache);
     })
   );
 });
 
-// Activate — clean old caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    )
-  );
-  self.clients.claim();
-});
-
-// Fetch — serve from cache, fall back to network
+// Fetch from cache when offline
 self.addEventListener('fetch', event => {
-  // Skip non-GET and Supabase requests
-  if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('supabase.co')) return;
-
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      const networkFetch = fetch(event.request).then(response => {
-        // Cache successful responses
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, clone);
-          });
+    caches.match(event.request).then(response => {
+      // Return cached version or fetch from network
+      if (response) {
+        return response;
+      }
+
+      return fetch(event.request).then(response => {
+        // Check if valid response
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
         }
+
+        // Clone and cache the response
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseToCache);
+        });
+
         return response;
       }).catch(() => {
-        // Network failed — return cached or offline page
-        return cached || caches.match('/index.html');
+        // Return offline page if network fails
+        return caches.match('/index.html');
       });
+    })
+  );
+});
 
-      // Return cached first for speed, then update cache
-      return cached || networkFetch;
+// Update service worker
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(cacheName => cacheName !== CACHE_NAME)
+          .map(cacheName => caches.delete(cacheName))
+      );
     })
   );
 });
